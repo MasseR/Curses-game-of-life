@@ -1,0 +1,9 @@
+What, why?
+----------
+
+This is an implementation of John Conway's game of life, made with C and Curses
+library. The purpose was to practice C, but I ended up making an interface with
+curses and at the same time practicing it.
+
+Any comments, modifications and stuff are welcome as long as they are
+constructive :)
