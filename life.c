@@ -167,10 +167,10 @@ void tick()
         }
         /* Sync the cells with the buffer */
         COPYB;
-        /* Sleep for while */
-        nanosleep(&sleeptime, remaining);
         /* Refresh the screen */
         wrefresh(life);
+        /* Sleep for while */
+        nanosleep(&sleeptime, remaining);
     }
 }
 
