@@ -104,20 +104,20 @@ bool kbd(int ch)
     int x,y; /* Holds the coordinates */
     getyx(life, y, x); /* Get the coordinates from curses life window */
     switch(ch)
-    { /* hjkl + q + space + enter */
+    {
         case 'q':
             return false;
             break;
-        case 'l': /* Go right */
+        case KEY_RIGHT: /* Go right */
             x=(x+1)%CMAX;
             break;
-        case 'h': /* Go left */
+        case KEY_LEFT: /* Go left */
             x=(x-1)%CMAX;
             break;
-        case 'j': /* Go down */
+        case KEY_DOWN: /* Go down */
             y=(y+1)%LMAX;
             break;
-        case 'k': /* Go up */
+        case KEY_UP: /* Go up */
             y=(y-1)%LMAX;
             break;
         case ' ': /* Activate a cell */
@@ -126,11 +126,11 @@ bool kbd(int ch)
         case 10: /* Enter. Start the tick */
             tick();
             break;
-        case KEY_UP: /* Increase tick size */
+        case KEY_PPAGE: /* Increase tick size */
             ticksize++;
             status();
             break;
-        case KEY_DOWN: /* Reduce tick size */
+        case KEY_NPAGE: /* Reduce tick size */
             if(ticksize > minticksize)
               ticksize--;
             status();
