@@ -358,7 +358,7 @@ void status()
     mvwprintw(info, 6, 1, " Columns: %d", lifecols);
     mvwprintw(info, 7, 1, " Lines: %d", lifelines);
     mvwprintw(info, 8, 1, "Array size: %d", ASIZE);
-    mvwprintw(info, 9, 1, "Tick size: %d", ticksize);
+    mvwprintw(info, 9, 1, "Tick size: %d ", ticksize);
     getyx(life, y, x);
     wmove(life, y, x);
     wrefresh(info);
