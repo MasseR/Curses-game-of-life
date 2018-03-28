@@ -41,6 +41,7 @@ static int lifelines = 0;
 
 /* Default tick size. How many iterations are made in a tick */
 static int ticksize = 1;
+static int minticksize = 1;
 
 /* Information window */
 static WINDOW *info = NULL;
@@ -130,7 +131,8 @@ bool kbd(int ch)
             status();
             break;
         case KEY_DOWN: /* Reduce tick size */
-            ticksize--;
+            if(ticksize > minticksize)
+              ticksize--;
             status();
             break;
     }
