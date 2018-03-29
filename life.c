@@ -133,18 +133,15 @@ bool kbd(int ch)
             break;
         case KEY_PPAGE: /* Increase tick size */
             ticksize++;
-            status();
             break;
         case KEY_NPAGE: /* Reduce tick size */
             if(ticksize > minticksize)
               ticksize--;
-            status();
             break;
     }
     wmove(life, y, x); /* Move the coordinates to the new location and refresh
                           the game area */
-    wrefresh(life);
-
+    status();
     return true;
 }
 
@@ -346,6 +343,7 @@ void init()
 void status()
 {
     int y,x;
+    getyx(life, y, x);
     mvwprintw(info, 2, 1, "Total sizes");
     mvwprintw(info, 3, 1, " Columns: %d", COLS);
     mvwprintw(info, 4, 1, " Lines: %d", LINES);
@@ -361,7 +359,8 @@ void status()
         mvwprintw(info, 11, 1, "Running");
         mvwprintw(info, 12, 1, "  Step: %d ", current_step);
     }
-    getyx(life, y, x);
+    /* print the cursor y and x position */
+    mvwprintw(info, ILINES-2, 1, "L = %d C = %d    ", y, x);
     wmove(life, y, x);
     wrefresh(info);
     wrefresh(life);
