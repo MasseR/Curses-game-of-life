@@ -51,10 +51,6 @@ static WINDOW *life = NULL;
 /* Holds the sleep time */
 static struct timespec sleeptime = {0};
 
-/* Prints the game area, but is not used since the curses interface. Obsolete
- * */
-void print();
-
 /* Prints status information about the game. Window size, game size, tick size
  * etc. Populates the info-window */
 void status();
@@ -329,25 +325,6 @@ void init()
 
     /* Write the first status information */
     status();
-}
-
-void print()
-{
-    int x, y;
-    printf("\n");
-    for(x = 0; x < COLS+2; x++)
-        printf("-");
-    printf("\n");
-    for(y = 0; y < LINES; y++)
-    {
-        printf("|");
-        for(x = 0; x < COLS; x++)
-            printf("%d", CELL(y, x));
-        printf("|\n");
-    }
-    for(x = 0; x < COLS+2; x++)
-        printf("-");
-    printf("\n");
 }
 
 void status()
