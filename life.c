@@ -111,16 +111,16 @@ bool kbd(int ch)
             return false;
             break;
         case KEY_RIGHT: /* Go right */
-            x=(x+1)%CMAX;
+            x=(x+1)%lifecols;
             break;
         case KEY_LEFT: /* Go left */
-            x=(x+CMAX-1)%CMAX;
+            x=(x+lifecols-1)%lifecols;
             break;
         case KEY_DOWN: /* Go down */
-            y=(y+1)%LMAX;
+            y=(y+1)%lifelines;
             break;
         case KEY_UP: /* Go up */
-            y=(y+LMAX-1)%LMAX;
+            y=(y+lifelines-1)%lifelines;
             break;
         case ' ': /* Activate a cell */
             activate(y, x);
@@ -306,9 +306,8 @@ void initcurses()
      * before writing. */
     mvwprintw(info, 1,1, "INFO");
 
-    /* Move the cursor back to game area. The user don't need to see the cursor
-     * jumping to the info-window */
-    wmove(life, 1,1);
+    /* Move the cursor to the centre of the field. */
+    wmove(life, lifelines/2, lifecols/2);
 
     /* Refresh both of the windows */
     wrefresh(info);
@@ -344,14 +343,14 @@ void status()
 {
     int y,x;
     getyx(life, y, x);
-    mvwprintw(info, 2, 1, "Total sizes");
+    mvwprintw(info, 2, 1, "Terminal size");
     mvwprintw(info, 3, 1, " Columns: %d", COLS);
     mvwprintw(info, 4, 1, " Lines: %d", LINES);
-    mvwprintw(info, 5, 1, "Life sizes");
+    mvwprintw(info, 5, 1, "Life field size");
     mvwprintw(info, 6, 1, " Columns: %d", lifecols);
     mvwprintw(info, 7, 1, " Lines: %d", lifelines);
     mvwprintw(info, 8, 1, "Array size: %d", ASIZE);
-    mvwprintw(info, 9, 1, "Tick size: %d ", ticksize);
+    mvwprintw(info, 9, 1, "Steps per run: %d ", ticksize);
 
     /* if we are currently running, say so in status bar */
     if(current_step > 0)
