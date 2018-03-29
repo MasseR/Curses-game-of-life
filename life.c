@@ -43,6 +43,9 @@ static int lifelines = 0;
 static int ticksize = 1;
 static int minticksize = 1;
 
+/* The current iteration (tick) */
+static int current_step = 0;
+
 /* Information window */
 static WINDOW *info = NULL;
 /* Game area */
@@ -153,7 +156,7 @@ void tick()
      * y = y coordinate
      * n = neighbours for a coordinate
      */
-    int t, x, y, n;
+    int x, y, n;
     /* Sync the buffer with the game area
      * buffer <- cells.
      * The buffer and cells are separated so that the calculations from this
@@ -164,7 +167,7 @@ void tick()
      * during the round, but after we have finished the round, we can sync
      * them. */
     COPYC;
-    for(t = 0; t < ticksize; t++)
+    for(current_step = ticksize; current_step > 0; current_step--)
     { /* Iterations */
         for(x = 0; x < lifecols; x++)
         {
@@ -194,10 +197,17 @@ void tick()
         /* Sync the cells with the buffer */
         COPYB;
         /* Refresh the screen */
-        wrefresh(life);
+        //wrefresh(life);
+        status();
         /* Sleep for while */
         nanosleep(&sleeptime, remaining);
     }
+
+    /* remove the "Running" status when done */
+    current_step = 0;
+    mvwprintw(info, 11, 1, "       ");
+    mvwprintw(info, 12, 1, "            ");
+    wrefresh(info);
 }
 
 int neighbours(int y, int x)
@@ -344,6 +354,13 @@ void status()
     mvwprintw(info, 7, 1, " Lines: %d", lifelines);
     mvwprintw(info, 8, 1, "Array size: %d", ASIZE);
     mvwprintw(info, 9, 1, "Tick size: %d ", ticksize);
+
+    /* if we are currently running, say so in status bar */
+    if(current_step > 0)
+    {
+        mvwprintw(info, 11, 1, "Running");
+        mvwprintw(info, 12, 1, "  Step: %d ", current_step);
+    }
     getyx(life, y, x);
     wmove(life, y, x);
     wrefresh(info);
