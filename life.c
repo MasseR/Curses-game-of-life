@@ -114,13 +114,13 @@ bool kbd(int ch)
             x=(x+1)%CMAX;
             break;
         case KEY_LEFT: /* Go left */
-            x=(x-1)%CMAX;
+            x=(x+CMAX-1)%CMAX;
             break;
         case KEY_DOWN: /* Go down */
             y=(y+1)%LMAX;
             break;
         case KEY_UP: /* Go up */
-            y=(y-1)%LMAX;
+            y=(y+LMAX-1)%LMAX;
             break;
         case ' ': /* Activate a cell */
             activate(y, x);
