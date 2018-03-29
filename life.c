@@ -70,6 +70,9 @@ void tick();
 /* Activate a cell and the visual representation of it */
 void activate(int y, int x);
 
+/* Deactivate a cell erase its visual representation */
+void deactivate(int y, int x);
+
 /* A helper function for creating new windows */
 WINDOW *createwin(int height, int width, int begy, int begx);
 
@@ -118,6 +121,9 @@ bool kbd(int ch)
             break;
         case ' ': /* Activate a cell */
             activate(y, x);
+            break;
+        case KEY_DC: /* Deactivate a cell */
+            deactivate(y, x);
             break;
         case 10: /* Enter. Start the tick */
             tick();
@@ -350,4 +356,12 @@ void activate(int y, int x)
     CPR(y,x);
     /* And show it visually too */
     mvwaddch(life, y, x, 'X');
+}
+
+void deactivate(int y, int x)
+{
+    /* Set the cell dead in the array */
+    ACPR(y,x);
+    /* And erase its visual representation */
+    mvwaddch(life, y, x, ' ');
 }
