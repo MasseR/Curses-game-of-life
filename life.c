@@ -41,6 +41,10 @@ static int lifelines = 0;
 
 /* Default tick size. How many iterations are made in a tick */
 static int ticksize = 1;
+static int minticksize = 1;
+
+/* The current iteration (tick) */
+static int current_step = 0;
 
 /* Information window */
 static WINDOW *info = NULL;
@@ -49,10 +53,6 @@ static WINDOW *life = NULL;
 
 /* Holds the sleep time */
 static struct timespec sleeptime = {0};
-
-/* Prints the game area, but is not used since the curses interface. Obsolete
- * */
-void print();
 
 /* Prints status information about the game. Window size, game size, tick size
  * etc. Populates the info-window */
@@ -72,6 +72,9 @@ void tick();
 
 /* Activate a cell and the visual representation of it */
 void activate(int y, int x);
+
+/* Deactivate a cell erase its visual representation */
+void deactivate(int y, int x);
 
 /* A helper function for creating new windows */
 WINDOW *createwin(int height, int width, int begy, int begx);
@@ -103,41 +106,42 @@ bool kbd(int ch)
     int x,y; /* Holds the coordinates */
     getyx(life, y, x); /* Get the coordinates from curses life window */
     switch(ch)
-    { /* hjkl + q + space + enter */
+    {
         case 'q':
             return false;
             break;
-        case 'l': /* Go right */
-            x=(x+1)%CMAX;
+        case KEY_RIGHT: /* Go right */
+            x=(x+1)%lifecols;
             break;
-        case 'h': /* Go left */
-            x=(x-1)%CMAX;
+        case KEY_LEFT: /* Go left */
+            x=(x+lifecols-1)%lifecols;
             break;
-        case 'j': /* Go down */
-            y=(y+1)%LMAX;
+        case KEY_DOWN: /* Go down */
+            y=(y+1)%lifelines;
             break;
-        case 'k': /* Go up */
-            y=(y-1)%LMAX;
+        case KEY_UP: /* Go up */
+            y=(y+lifelines-1)%lifelines;
             break;
         case ' ': /* Activate a cell */
             activate(y, x);
             break;
+        case KEY_DC: /* Deactivate a cell */
+            deactivate(y, x);
+            break;
         case 10: /* Enter. Start the tick */
             tick();
             break;
-        case KEY_UP: /* Increase tick size */
+        case KEY_PPAGE: /* Increase tick size */
             ticksize++;
-            status();
             break;
-        case KEY_DOWN: /* Reduce tick size */
-            ticksize--;
-            status();
+        case KEY_NPAGE: /* Reduce tick size */
+            if(ticksize > minticksize)
+              ticksize--;
             break;
     }
     wmove(life, y, x); /* Move the coordinates to the new location and refresh
                           the game area */
-    wrefresh(life);
-
+    status();
     return true;
 }
 
@@ -149,7 +153,7 @@ void tick()
      * y = y coordinate
      * n = neighbours for a coordinate
      */
-    int t, x, y, n;
+    int x, y, n;
     /* Sync the buffer with the game area
      * buffer <- cells.
      * The buffer and cells are separated so that the calculations from this
@@ -160,7 +164,7 @@ void tick()
      * during the round, but after we have finished the round, we can sync
      * them. */
     COPYC;
-    for(t = 0; t < ticksize; t++)
+    for(current_step = ticksize; current_step > 0; current_step--)
     { /* Iterations */
         for(x = 0; x < lifecols; x++)
         {
@@ -190,10 +194,17 @@ void tick()
         /* Sync the cells with the buffer */
         COPYB;
         /* Refresh the screen */
-        wrefresh(life);
+        //wrefresh(life);
+        status();
         /* Sleep for while */
         nanosleep(&sleeptime, remaining);
     }
+
+    /* remove the "Running" status when done */
+    current_step = 0;
+    mvwprintw(info, 11, 1, "       ");
+    mvwprintw(info, 12, 1, "            ");
+    wrefresh(info);
 }
 
 int neighbours(int y, int x)
@@ -295,9 +306,8 @@ void initcurses()
      * before writing. */
     mvwprintw(info, 1,1, "INFO");
 
-    /* Move the cursor back to game area. The user don't need to see the cursor
-     * jumping to the info-window */
-    wmove(life, 1,1);
+    /* Move the cursor to the centre of the field. */
+    wmove(life, lifelines/2, lifecols/2);
 
     /* Refresh both of the windows */
     wrefresh(info);
@@ -329,37 +339,27 @@ void init()
     status();
 }
 
-void print()
-{
-    int x, y;
-    printf("\n");
-    for(x = 0; x < COLS+2; x++)
-        printf("-");
-    printf("\n");
-    for(y = 0; y < LINES; y++)
-    {
-        printf("|");
-        for(x = 0; x < COLS; x++)
-            printf("%d", CELL(y, x));
-        printf("|\n");
-    }
-    for(x = 0; x < COLS+2; x++)
-        printf("-");
-    printf("\n");
-}
-
 void status()
 {
     int y,x;
-    mvwprintw(info, 2, 1, "Total sizes");
+    getyx(life, y, x);
+    mvwprintw(info, 2, 1, "Terminal size");
     mvwprintw(info, 3, 1, " Columns: %d", COLS);
     mvwprintw(info, 4, 1, " Lines: %d", LINES);
-    mvwprintw(info, 5, 1, "Life sizes");
+    mvwprintw(info, 5, 1, "Life field size");
     mvwprintw(info, 6, 1, " Columns: %d", lifecols);
     mvwprintw(info, 7, 1, " Lines: %d", lifelines);
     mvwprintw(info, 8, 1, "Array size: %d", ASIZE);
-    mvwprintw(info, 9, 1, "Tick size: %d", ticksize);
-    getyx(life, y, x);
+    mvwprintw(info, 9, 1, "Steps per run: %d ", ticksize);
+
+    /* if we are currently running, say so in status bar */
+    if(current_step > 0)
+    {
+        mvwprintw(info, 11, 1, "Running");
+        mvwprintw(info, 12, 1, "  Step: %d ", current_step);
+    }
+    /* print the cursor y and x position */
+    mvwprintw(info, ILINES-2, 1, "L = %d C = %d    ", y, x);
     wmove(life, y, x);
     wrefresh(info);
     wrefresh(life);
@@ -371,4 +371,12 @@ void activate(int y, int x)
     CPR(y,x);
     /* And show it visually too */
     mvwaddch(life, y, x, 'X');
+}
+
+void deactivate(int y, int x)
+{
+    /* Set the cell dead in the array */
+    ACPR(y,x);
+    /* And erase its visual representation */
+    mvwaddch(life, y, x, ' ');
 }

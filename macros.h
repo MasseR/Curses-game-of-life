@@ -39,11 +39,10 @@ THE SOFTWARE.
 # define ASIZE (lifecols*lifelines) /* Amount of cells */
 # define SIZE (ASIZE*sizeof(int)) /* And the real size of it */
 
-# define CPR(y, x) (cells[COORD((y),(x))] = 1) /* Give CPR to the defined
-                                                  coordinate. (Make it alive)
-                                                  */
+# define CPR(y, x) (cells[COORD((y),(x))] = 1) /* Give cell life */
 # define BCPR(y, x) (buffer[COORD((y),(x))] = 1) /* The same but for buffer */
-# define ABCPR(y, x) (buffer[COORD((y),(x))] = 0) /* Kill the cell. Anticpr */
+# define ACPR(y, x) (cells[COORD((y),(x))] = 0) /* Kill the cell. AntiCPR */
+# define ABCPR(y, x) (buffer[COORD((y),(x))] = 0) /* The same but for buffer */
 
 # define COPYB memcpy(cells, buffer, SIZE) /* Sync the cells with the data from
                                               the buffer */
